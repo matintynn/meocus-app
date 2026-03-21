@@ -73,6 +73,7 @@ export default function TaskItem({
             className={`
         group flex items-start gap-3 min-h-[48px] px-3 py-2.5 rounded-xl transition-all duration-150 hover:bg-white/[0.04]
         ${leftBorderColor}
+        ${task.isDone ? 'opacity-50' : ''}
         ${isSomeday && !task.isDone ? 'opacity-60' : ''}
         ${removing ? 'opacity-0 -translate-y-2' : ''}
       `}
