@@ -1,0 +1,188 @@
+import { Task, Sprint } from './types'
+
+function getDateStr(offsetDays: number): string {
+    const d = new Date()
+    d.setDate(d.getDate() + offsetDays)
+    return d.toISOString().split('T')[0]
+}
+
+function getISOTimestamp(offsetDays: number): string {
+    const d = new Date()
+    d.setDate(d.getDate() + offsetDays)
+    return d.toISOString()
+}
+
+const today = getDateStr(0)
+const yesterday = getDateStr(-1)
+const tomorrow = getDateStr(1)
+const in3days = getDateStr(3)
+const in6days = getDateStr(6)
+
+export const mockTasks: Task[] = [
+    {
+        id: 'task-1',
+        title: 'Review design system changes',
+        bucket: 'work',
+        urgency: 'urgent',
+        deadline: today,
+        isPinnedToday: true,
+        pinnedDate: today,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: 'sprint-1',
+        createdAt: getISOTimestamp(-2),
+    },
+    {
+        id: 'task-2',
+        title: 'Read chapter on P&L statements',
+        bucket: 'learn',
+        urgency: 'normal',
+        deadline: tomorrow,
+        isPinnedToday: true,
+        pinnedDate: today,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: 'sprint-1',
+        createdAt: getISOTimestamp(-3),
+    },
+    {
+        id: 'task-3',
+        title: 'Book gym sessions this week',
+        bucket: 'life',
+        urgency: 'normal',
+        deadline: null,
+        isPinnedToday: true,
+        pinnedDate: today,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: null,
+        createdAt: getISOTimestamp(-1),
+    },
+    {
+        id: 'task-4',
+        title: 'Write sprint retrospective notes',
+        bucket: 'work',
+        urgency: 'normal',
+        deadline: in3days,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: 'sprint-1',
+        createdAt: getISOTimestamp(-4),
+    },
+    {
+        id: 'task-5',
+        title: 'Respond to client feedback email',
+        bucket: 'work',
+        urgency: 'urgent',
+        deadline: today,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: null,
+        createdAt: getISOTimestamp(-1),
+    },
+    {
+        id: 'task-6',
+        title: 'Watch UX psychology lecture',
+        bucket: 'learn',
+        urgency: 'normal',
+        deadline: in3days,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: null,
+        createdAt: getISOTimestamp(-5),
+    },
+    {
+        id: 'task-7',
+        title: 'Plan weekend trip to Đà Lạt',
+        bucket: 'life',
+        urgency: 'someday',
+        deadline: null,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: null,
+        createdAt: getISOTimestamp(-6),
+    },
+    {
+        id: 'task-8',
+        title: 'Refactor the onboarding flow',
+        bucket: 'work',
+        urgency: 'normal',
+        deadline: in6days,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: 'sprint-1',
+        createdAt: getISOTimestamp(-7),
+    },
+    {
+        id: 'task-9',
+        title: 'Practice vocabulary flashcards',
+        bucket: 'learn',
+        urgency: 'normal',
+        deadline: yesterday,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: true,
+        isDone: false,
+        doneAt: null,
+        sprintId: null,
+        createdAt: getISOTimestamp(-3),
+    },
+    {
+        id: 'task-10',
+        title: 'Update portfolio with new projects',
+        bucket: 'work',
+        urgency: 'someday',
+        deadline: null,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: false,
+        doneAt: null,
+        sprintId: null,
+        createdAt: getISOTimestamp(-8),
+    },
+    {
+        id: 'task-11',
+        title: 'Finish reading Mental Models book',
+        bucket: 'learn',
+        urgency: 'normal',
+        deadline: null,
+        isPinnedToday: false,
+        pinnedDate: null,
+        carriedOver: false,
+        isDone: true,
+        doneAt: getISOTimestamp(-1),
+        sprintId: null,
+        createdAt: getISOTimestamp(-10),
+    },
+]
+
+export const mockSprint: Sprint = {
+    id: 'sprint-1',
+    title: 'Finance foundations + UX basics',
+    startDate: getDateStr(-4),
+    endDate: getDateStr(10),
+    workGoal: 'Complete the design system audit and ship v2',
+    learnGoal: 'Finish finance module, learn 40 new English words',
+    lifeGoal: 'Gym 3× per week, sleep before midnight every night',
+    notes: '',
+    isActive: true,
+}
