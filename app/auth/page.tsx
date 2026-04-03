@@ -217,7 +217,9 @@ export default function AuthPage() {
                     Clawlist
                 </h1>
                 <p className="text-sm text-text3 text-center mb-8">
-                    {isSignUp ? 'Create your account' : 'Sign in to your account'}
+                    {isSignUp
+                        ? 'Create your account — your password is for this app only, and your data is secure.'
+                        : 'Sign in to your account'}
                 </p>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3">
