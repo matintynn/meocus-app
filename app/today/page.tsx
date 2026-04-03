@@ -8,7 +8,9 @@ import { useSidebarToggle } from '@/components/layout/AppShell'
 import Topbar from '@/components/layout/Topbar'
 import AddTaskModal from '@/components/ui/AddTaskModal'
 import TaskItem from '@/components/tasks/TaskItem'
+import { Plus, ChevronRight, X } from 'lucide-react'
 import CheckinModal from '@/components/ui/CheckinModal'
+import Button from '@/components/ui/Button'
 import { useStore } from '@/lib/store'
 import { useToast } from '@/components/ui/Toast'
 import { formatFullDate, toDateString, formatWeekRange, daysRemaining, getSprintProgress } from '@/lib/utils/dates'
@@ -22,15 +24,27 @@ function TodayContent() {
     const [checkinOpen, setCheckinOpen] = useState(false)
     const [addTaskOpen, setAddTaskOpen] = useState(false)
     const [bannerDismissed, setBannerDismissed] = useState(false)
+    const [showDoneLane, setShowDoneLane] = useState(false)
 
-    const now = new Date()
+    const [now, setNow] = useState(() => new Date())
+    useEffect(() => {
+        const tick = () => setNow(new Date())
+        // align to the next full minute, then tick every 60s
+        const msUntilNextMinute = (60 - new Date().getSeconds()) * 1000
+        const timeout = setTimeout(() => {
+            tick()
+            const interval = setInterval(tick, 60_000)
+            return () => clearInterval(interval)
+        }, msUntilNextMinute)
+        return () => clearTimeout(timeout)
+    }, [])
     const hour = now.getHours()
 
     // Show notification banner at/after 10 PM if no check-in today and not dismissed
     const showCheckinBanner = hour >= 22 && !store.hasCheckedInToday && !bannerDismissed
-    let greeting = 'Good evening, Matin.'
-    if (hour >= 5 && hour < 12) greeting = 'Good morning, Matin.'
-    else if (hour >= 12 && hour < 17) greeting = 'Good afternoon, Matin.'
+    let greeting = 'Good evening.'
+    if (hour >= 5 && hour < 12) greeting = 'Good morning.'
+    else if (hour >= 12 && hour < 17) greeting = 'Good afternoon.'
 
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -70,7 +84,7 @@ function TodayContent() {
     const doneTodayTasks = useMemo(() => {
         const todayStr = toDateString(new Date())
         return store.tasks.filter(
-            (t) => t.isDone && t.doneAt && t.doneAt.startsWith(todayStr)
+            (t) => t.isDone && t.doneAt && toDateString(new Date(t.doneAt)) === todayStr
         )
     }, [store.tasks])
 
@@ -96,6 +110,7 @@ function TodayContent() {
         urgency: 'urgent' | 'normal' | 'someday'
         deadline: string | null
         tagToSprint: boolean
+        notes: string
     }) {
         store.addTask({
             title: data.title,
@@ -108,6 +123,7 @@ function TodayContent() {
             isDone: false,
             doneAt: null,
             sprintId: data.tagToSprint && store.sprint?.isActive ? store.sprint.id : null,
+            notes: data.notes,
         })
         setAddTaskOpen(false)
         showToast('Task added')
@@ -131,9 +147,21 @@ function TodayContent() {
         }
 
         if (source.droppableId === 'thisWeek' && destination.droppableId === 'today') {
-            store.pinTask(draggableId)
+            const todayStr = toDateString(new Date())
+            store.updateTask(draggableId, {
+                deadline: todayStr,
+                isPinnedToday: false,
+                pinnedDate: null,
+                carriedOver: false,
+            })
         } else if (source.droppableId === 'today' && destination.droppableId === 'thisWeek') {
-            store.unpinTask(draggableId)
+            const task = store.tasks.find(t => t.id === draggableId)
+            const fallbackDeadline = toDateString(new Date(Date.now() + 86400000))
+            store.updateTask(draggableId, {
+                deadline: task?.deadline && task.deadline > toDateString(new Date()) ? task.deadline : fallbackDeadline,
+                isPinnedToday: false,
+                pinnedDate: null,
+            })
         }
     }, [store])
 
@@ -152,15 +180,12 @@ function TodayContent() {
                     }
                     onMenuClick={toggle}
                     extra={
-                        <button
+                        <Button
                             onClick={() => setAddTaskOpen(true)}
-                            className="inline-flex items-center gap-1.5 bg-text text-bg text-[13px] font-medium rounded-xl px-4 py-2 hover:opacity-85 transition-all duration-150 active:scale-[0.98]"
                         >
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                                <path d="M7 3v8M3 7h8" />
-                            </svg>
+                            <Plus size={14} strokeWidth={1.5} />
                             Add Task
-                        </button>
+                        </Button>
                     }
                 />
 
@@ -183,19 +208,11 @@ function TodayContent() {
                                 onClick={() => setCheckinOpen(true)}
                                 className="text-[13px] font-medium text-[#f0b060] hover:text-[#f5c580] transition-colors"
                             >
-                                Reflect now →
+                                <span className="flex items-center gap-1">Reflect now <ChevronRight size={12} /></span>
                             </button>
                         </div>
                     </div>
                 )}
-
-                {/* Stats row */}
-                <div className="flex flex-row gap-3 mb-4">
-                    <StatCard label="Pinned today" value={store.todayPinned.length} />
-                    <StatCard label="Done today" value={doneToday} />
-                    <StatCard label="Open total" value={store.openCount} />
-                    <SprintStatCard sprint={store.sprint} />
-                </div>
 
                 {/* Carried over section */}
                 {store.carriedOver.length > 0 && (
@@ -226,27 +243,34 @@ function TodayContent() {
                             <div className="text-center">
                                 <div className="text-[15px] text-text2 font-medium mb-1">No tasks yet</div>
                                 <div className="text-[13px] text-text3 mb-4">Start by adding your first task</div>
-                                <button
-                                    onClick={() => setAddTaskOpen(true)}
-                                    className="inline-flex items-center gap-1.5 bg-text text-bg text-[13px] font-medium rounded-xl px-4 py-2 hover:opacity-85 transition-all duration-150 active:scale-[0.98]"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                                        <path d="M7 3v8M3 7h8" />
-                                    </svg>
+                                <Button onClick={() => setAddTaskOpen(true)}>
+                                    <Plus size={14} strokeWidth={1.5} />
                                     Add Task
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className={`flex-1 min-h-0 grid grid-cols-1 gap-4 ${(store.thisWeekTasks.length > 0 && doneToday > 0) ? 'md:grid-cols-3' : (store.thisWeekTasks.length > 0 || doneToday > 0) ? 'md:grid-cols-2' : ''}`}>
+                    <div className={`flex-1 min-h-0 grid grid-cols-1 gap-4 ${(store.thisWeekTasks.length > 0 && showDoneLane) ? 'md:grid-cols-3' : (store.thisWeekTasks.length > 0 || showDoneLane) ? 'md:grid-cols-2' : ''}`}>
                         {/* Lane 1: Today */}
                         <div className="flex flex-col min-h-0 bg-surface/50 rounded-xl border border-border">
                             <div className="flex-shrink-0 px-4 pt-3 pb-2">
-                                <SectionHeader
-                                    label="TODAY"
-                                    extra={`${todayCount} task${todayCount !== 1 ? 's' : ''}`}
-                                />
+                                <div className="flex items-center justify-between gap-2 mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-medium text-text3 uppercase tracking-wider">Today</span>
+                                        <span className="bg-surface3 text-text font-semibold text-[10px] px-1.5 py-px rounded-full">{todayCount}</span>
+                                    </div>
+                                    {doneToday > 0 && !showDoneLane && (
+                                        <button
+                                            onClick={() => setShowDoneLane(true)}
+                                            className="flex items-center gap-1.5 hover:opacity-75 transition-opacity"
+                                        >
+                                            <span className="bg-green-900/60 text-green-400 font-semibold text-[10px] px-1.5 py-px rounded-full">{doneToday}</span>
+                                            <span className="text-[11px] font-medium text-text3 uppercase tracking-wider">Done</span>
+                                            <ChevronRight size={12} className="text-text3" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <Droppable droppableId="today">
                                 {(provided, snapshot) => (
@@ -302,7 +326,33 @@ function TodayContent() {
                             </Droppable>
                         </div>
 
-                        {/* Lane 2: Coming Up — only when non-today tasks exist */}
+                        {/* Lane 2: Done today */}
+                        {showDoneLane && doneToday > 0 && (
+                            <div className="flex flex-col min-h-0 bg-surface/50 rounded-xl border border-border">
+                                <div className="flex-shrink-0 px-4 pt-3 pb-2 flex items-center justify-between gap-2">
+                                    <SectionHeader
+                                        label="DONE TODAY"
+                                        count={doneToday}
+                                    />
+                                    <button
+                                        onClick={() => setShowDoneLane(false)}
+                                        className="w-5 h-5 flex items-center justify-center rounded-md text-text3 hover:bg-surface2 hover:text-text transition-all flex-shrink-0"
+                                        title="Close"
+                                    >
+                                        <X size={12} strokeWidth={1.5} />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto px-3 pb-3">
+                                    <div className="flex flex-col gap-1">
+                                        {doneTodayTasks.map((task) => (
+                                            <TaskItem key={task.id} task={task} />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Lane 3: Coming Up — only when non-today tasks exist */}
                         {store.thisWeekTasks.length > 0 && (
                             <div className="flex flex-col min-h-0 bg-surface/50 rounded-xl border border-border">
                                 <div className="flex-shrink-0 px-4 pt-3 pb-2">
@@ -341,25 +391,6 @@ function TodayContent() {
                                         </div>
                                     )}
                                 </Droppable>
-                            </div>
-                        )}
-
-                        {/* Lane 3: Done today */}
-                        {doneToday > 0 && (
-                            <div className="flex flex-col min-h-0 bg-surface/50 rounded-xl border border-border">
-                                <div className="flex-shrink-0 px-4 pt-3 pb-2">
-                                    <SectionHeader
-                                        label="DONE TODAY"
-                                        count={doneToday}
-                                    />
-                                </div>
-                                <div className="flex-1 overflow-y-auto px-3 pb-3">
-                                    <div className="flex flex-col gap-1">
-                                        {doneTodayTasks.map((task) => (
-                                            <TaskItem key={task.id} task={task} />
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         )}
                     </div>
@@ -411,40 +442,20 @@ function StatCard({
 function SprintStatCard({ sprint }: { sprint: Sprint | null }) {
     if (!sprint || !sprint.isActive) {
         return (
-            <div className="flex-1 min-w-0 bg-surface border border-border rounded-xl px-3.5 py-3">
+            <div className="bg-surface border border-border rounded-xl px-3.5 py-2">
                 <div className="text-[13px] text-text3">No sprint</div>
                 <div className="text-[11px] text-text3 mt-0.5">Active sprint</div>
             </div>
         )
     }
 
-    const progress = getSprintProgress(sprint.startDate, sprint.endDate)
     const days = daysRemaining(sprint.endDate)
-    const circumference = 2 * Math.PI * 12
-    const strokeDash = (progress / 100) * circumference
 
     return (
-        <div className="flex-1 min-w-0 bg-surface border border-border rounded-xl px-3.5 py-3 flex items-center justify-between gap-2">
-            <div className="min-w-0">
-                <div className="text-[11px] text-text3 mb-0.5">Active sprint</div>
-                <div className="text-[13px] text-text font-medium">{days} days left</div>
-            </div>
-            <div className="relative w-8 h-8 flex-shrink-0">
-                <svg width="32" height="32" viewBox="0 0 32 32" className="-rotate-90">
-                    <circle cx="16" cy="16" r="12" fill="none" stroke="#3A3A3C" strokeWidth="2.5" />
-                    <circle
-                        cx="16" cy="16" r="12"
-                        fill="none"
-                        stroke="#F5F5F7"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeDasharray={`${strokeDash} ${circumference}`}
-                    />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[9px] text-text2 font-medium">
-                    {progress}%
-                </span>
-            </div>
+        <div className="bg-surface border border-border rounded-xl px-3.5 py-2 flex items-center gap-2">
+            <span className="text-[13px] text-text3">Active sprint</span>
+            <span className="text-text3 mx-0.5">·</span>
+            <span className="text-[13px] text-text font-medium">{days} days left</span>
         </div>
     )
 }
@@ -467,11 +478,11 @@ function SectionHeader({
                 <span className="text-[11px] text-text3">{extra}</span>
             )}
             {count !== undefined && (
-                <span className="bg-surface3 text-text3 text-[10px] px-1.5 py-px rounded-full">
+                <span className="bg-surface3 text-text font-semibold text-[10px] px-1.5 py-px rounded-full">
                     {count}
                 </span>
             )}
-            <div className="flex-1 h-px bg-border ml-1" />
+
         </div>
     )
 }

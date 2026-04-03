@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import { Menu } from 'lucide-react'
 import { SortMode } from '@/lib/utils/sort'
 
 interface TopbarProps {
@@ -21,7 +22,7 @@ export default function Topbar({
     extra,
 }: TopbarProps) {
     return (
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-[26px]">
             <div className="flex items-center gap-3">
                 {/* Hamburger — mobile only */}
                 <button
@@ -29,9 +30,7 @@ export default function Topbar({
                     className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-text2 hover:bg-surface2 transition-all duration-150"
                     aria-label="Open menu"
                 >
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                        <path d="M3 5h12M3 9h12M3 13h12" />
-                    </svg>
+                    <Menu size={18} />
                 </button>
                 <div>{title}</div>
             </div>

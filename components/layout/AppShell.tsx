@@ -2,6 +2,9 @@
 
 import { useState, createContext, useContext, ReactNode } from 'react'
 import Sidebar from './Sidebar'
+import { useStore } from '@/lib/store'
+import ConfettiOverlay from '@/components/ui/ConfettiOverlay'
+import OnboardingModal from '@/components/OnboardingModal'
 
 const SidebarContext = createContext<() => void>(() => { })
 export const useSidebarToggle = () => useContext(SidebarContext)
@@ -12,6 +15,15 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const { confettiKey, confettiBucket, isLoading } = useStore()
+
+    if (isLoading) {
+        return (
+            <div className="h-screen bg-bg flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-text/20 border-t-text/70" />
+            </div>
+        )
+    }
 
     return (
         <SidebarContext.Provider value={() => setSidebarOpen(true)}>
@@ -23,6 +35,8 @@ export default function AppShell({ children }: AppShellProps) {
                     </div>
                 </main>
             </div>
+            <ConfettiOverlay confettiKey={confettiKey} confettiBucket={confettiBucket} />
+            <OnboardingModal />
         </SidebarContext.Provider>
     )
 }

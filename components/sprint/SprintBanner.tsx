@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useStore } from '@/lib/store'
 import { daysRemaining, getSprintProgress } from '@/lib/utils/dates'
+import { ChevronRight } from 'lucide-react'
 
 export default function SprintBanner() {
     const { sprint } = useStore()
@@ -10,8 +11,8 @@ export default function SprintBanner() {
     if (!sprint || !sprint.isActive) {
         return (
             <Link href="/sprint">
-                <div className="bg-surface border border-border rounded-xl px-4 py-3 mb-6 text-[13px] text-text3 hover:border-border2 transition-all duration-150">
-                    No sprint — set one →
+                <div className="bg-surface border border-border rounded-xl px-4 py-3 mb-6 text-[13px] text-text3 hover:border-border2 transition-all duration-150 flex items-center gap-1">
+                    No sprint — set one <ChevronRight size={13} />
                 </div>
             </Link>
         )

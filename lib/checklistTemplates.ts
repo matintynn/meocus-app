@@ -1,0 +1,135 @@
+export interface ChecklistTemplate {
+    id: string
+    title: string
+    description: string
+    category: string
+    items: string[]
+}
+
+export const CHECKLIST_TEMPLATES: ChecklistTemplate[] = [
+    {
+        id: 'tpl-user-interview',
+        title: 'User Interview Prep',
+        description: 'Everything to set up a research session properly',
+        category: 'Research',
+        items: [
+            'Define research goals',
+            'Recruit participants',
+            'Prepare discussion guide',
+            'Set up recording tools',
+            'Send calendar invites & confirm',
+            'Prepare consent forms',
+            'Test equipment beforehand',
+            'Review previous related research',
+        ],
+    },
+    {
+        id: 'tpl-usability-test',
+        title: 'Usability Test Session',
+        description: 'Run-of-session checklist for usability testing',
+        category: 'Research',
+        items: [
+            'Welcome participant & introduce session',
+            'Explain think-aloud protocol',
+            'Start recording',
+            'Run through task scenarios',
+            'Note key observations & quotes',
+            'Ask post-test questions',
+            'Debrief participant',
+            'Save recording & session notes',
+        ],
+    },
+    {
+        id: 'tpl-component-design',
+        title: 'Component Design',
+        description: 'Before finalising a new UI component',
+        category: 'Design',
+        items: [
+            'Define component purpose & scope',
+            'Sketch variants & edge cases',
+            'Check spacing & type tokens',
+            'Define all interactive states (hover / focus / active / disabled)',
+            'Annotate for accessibility',
+            'Review against design system',
+            'Create Figma component & variants',
+            'Document usage guidelines',
+        ],
+    },
+    {
+        id: 'tpl-accessibility-audit',
+        title: 'Accessibility Audit',
+        description: 'WCAG compliance review for a screen or feature',
+        category: 'Design',
+        items: [
+            'Check colour contrast (WCAG AA minimum)',
+            'Verify logical focus order',
+            'Test full keyboard navigation',
+            'Confirm all images have alt text',
+            'Check all form inputs have labels',
+            'Test with screen reader',
+            'Verify touch target sizes (44×44px min)',
+            'Check reduced-motion preference support',
+        ],
+    },
+    {
+        id: 'tpl-figma-handoff',
+        title: 'Figma File Handoff',
+        description: 'Prep your Figma file before sharing with developers',
+        category: 'Handoff',
+        items: [
+            'Organise frames by user flow',
+            'Name all layers & groups clearly',
+            'Apply styles & variables throughout',
+            'Add redline annotations',
+            'Export assets at correct resolutions',
+            'Write notes on complex interactions',
+            'Share file link with dev team',
+            'Walk through file in a sync call',
+        ],
+    },
+    {
+        id: 'tpl-design-dev-review',
+        title: 'Design → Dev Spec Review',
+        description: 'Verify specs are complete before dev picks up the ticket',
+        category: 'Handoff',
+        items: [
+            'All edge cases and empty states covered',
+            'Responsive breakpoints specified',
+            'Spacing & typography values confirmed',
+            'Component states documented in specs',
+            'Animation timings & easing agreed',
+            'Developer has reviewed and signed off',
+            'Jira / Linear ticket updated with spec link',
+        ],
+    },
+    {
+        id: 'tpl-visual-qa',
+        title: 'Visual QA Before Ship',
+        description: 'Final design review on the built feature',
+        category: 'QA',
+        items: [
+            'Compare design vs implementation side by side',
+            'Check all responsive breakpoints',
+            'Test dark & light mode',
+            'Verify font families, sizes & weights',
+            'Check icon sizes & alignment',
+            'Test all interactive states in the browser',
+            'Check loading, skeleton & error states',
+            'Final sign-off recorded',
+        ],
+    },
+    {
+        id: 'tpl-ds-consistency',
+        title: 'Design System Check',
+        description: 'Ensure work stays consistent with the design system',
+        category: 'System',
+        items: [
+            'Check against latest DS version',
+            'Verify design token usage throughout',
+            'Confirm correct component usage (no one-offs)',
+            'Flag any justified deviations',
+            'Propose DS updates if a pattern is reusable',
+            'Notify team of any DS changes made',
+        ],
+    },
+]

@@ -1,38 +1,50 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
+import { Checkin } from '@/lib/types'
 
-interface CheckinModalProps {
+interface EditCheckinModalProps {
+    checkin: Checkin | null
     isOpen: boolean
     onClose: () => void
-    onSave: (data: { proud: string; tomorrow: string; notes: string }) => void
+    onSave: (updated: Checkin) => void
+    onDelete: (id: string) => void
 }
 
-export default function CheckinModal({ isOpen, onClose, onSave }: CheckinModalProps) {
+export default function EditCheckinModal({ checkin, isOpen, onClose, onSave, onDelete }: EditCheckinModalProps) {
     const [proud, setProud] = useState('')
     const [tomorrow, setTomorrow] = useState('')
     const [notes, setNotes] = useState('')
 
+    useEffect(() => {
+        if (checkin) {
+            setProud(checkin.proud)
+            setTomorrow(checkin.tomorrow)
+            setNotes(checkin.notes)
+        }
+    }, [checkin])
+
     function handleSave() {
-        onSave({ proud, tomorrow, notes })
-        setProud('')
-        setTomorrow('')
-        setNotes('')
+        if (!checkin) return
+        onSave({ ...checkin, proud, tomorrow, notes })
+        onClose()
     }
 
-    function handleClose() {
+    function handleDelete() {
+        if (!checkin) return
+        onDelete(checkin.id)
         onClose()
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose}>
+        <Modal isOpen={isOpen} onClose={onClose}>
             <h2 className="font-semibold text-[22px] leading-tight text-text mb-1">
-                Evening check-in
+                Edit reflection
             </h2>
             <p className="text-[13px] text-text2 leading-relaxed mb-5">
-                Take a moment to reflect on your day.
+                Update or delete this reflection.
             </p>
 
             <label className="block mb-4">
@@ -44,7 +56,6 @@ export default function CheckinModal({ isOpen, onClose, onSave }: CheckinModalPr
                     onChange={(e) => setProud(e.target.value)}
                     className="w-full bg-surface2 border border-border rounded-lg px-3 py-2.5 text-[14px] text-text placeholder:text-text3 focus:border-border2 focus:outline-none resize-none"
                     rows={2}
-                    placeholder="I finished..."
                 />
             </label>
 
@@ -57,7 +68,6 @@ export default function CheckinModal({ isOpen, onClose, onSave }: CheckinModalPr
                     onChange={(e) => setTomorrow(e.target.value)}
                     className="w-full bg-surface2 border border-border rounded-lg px-3 py-2.5 text-[14px] text-text placeholder:text-text3 focus:border-border2 focus:outline-none resize-none"
                     rows={2}
-                    placeholder="Tomorrow I'll..."
                 />
             </label>
 
@@ -70,15 +80,20 @@ export default function CheckinModal({ isOpen, onClose, onSave }: CheckinModalPr
                     onChange={(e) => setNotes(e.target.value)}
                     className="w-full bg-surface2 border border-border rounded-lg px-3 py-2.5 text-[14px] text-text placeholder:text-text3 focus:border-border2 focus:outline-none resize-none"
                     rows={2}
-                    placeholder="Anything else..."
                 />
             </label>
 
-            <div className="flex justify-end gap-2">
-                <Button variant="secondary" onClick={handleClose}>
-                    Cancel
-                </Button>
-                <Button onClick={handleSave}>Save check-in</Button>
+            <div className="flex items-center justify-between">
+                <button
+                    onClick={handleDelete}
+                    className="text-[13px] text-text3 hover:text-red-400 transition-colors duration-150"
+                >
+                    Delete
+                </button>
+                <div className="flex gap-2">
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button onClick={handleSave}>Save changes</Button>
+                </div>
             </div>
         </Modal>
     )

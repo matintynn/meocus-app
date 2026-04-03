@@ -1,7 +1,7 @@
 'use client'
 
 interface TagProps {
-    variant: 'work' | 'learn' | 'life' | 'urgent' | 'someday' | 'carried' | 'sprint'
+    variant: 'work' | 'learn' | 'life' | 'urgent' | 'normal' | 'someday' | 'carried' | 'sprint'
     label: string
     size?: 'sm' | 'default'
 }
@@ -11,6 +11,7 @@ const colorMap: Record<TagProps['variant'], { bg: string; text: string }> = {
     learn: { bg: '#3D2B0A', text: '#FCD34D' },
     life: { bg: '#2E1336', text: '#E879F9' },
     urgent: { bg: '#3B1212', text: '#FCA5A5' },
+    normal: { bg: '#2C2C2E', text: '#F5F5F7' },
     someday: { bg: '#27272A', text: '#A1A1AA' },
     carried: { bg: '#292008', text: '#FCD34D' },
     sprint: { bg: '#1A1A2E', text: '#818CF8' },

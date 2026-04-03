@@ -1,5 +1,7 @@
 'use client'
 
+import { Check } from 'lucide-react'
+
 interface CheckboxProps {
     checked: boolean
     onChange: () => void
@@ -19,22 +21,13 @@ export default function Checkbox({ checked, onChange }: CheckboxProps) {
             }}
         >
             {checked && (
-                <svg
+                <Check
                     className="absolute inset-0 m-auto"
-                    width="10"
-                    height="10"
-                    viewBox="0 0 10 10"
-                    fill="none"
+                    size={10}
+                    stroke="#0F0F0F"
+                    strokeWidth={2}
                     style={{ animation: 'checkScale 0.15s ease' }}
-                >
-                    <path
-                        d="M2 5L4.5 7.5L8 3"
-                        stroke="#0F0F0F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
+                />
             )}
             <style jsx>{`
         @keyframes checkScale {

@@ -1,63 +1,31 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Image from 'next/image'
+import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
+import { createClient } from '@/lib/supabase'
+import { fetchProfile } from '@/lib/db/profile'
 import { daysRemaining, getSprintProgress } from '@/lib/utils/dates'
+import { ListTodo, CalendarDays, BookOpen, ClipboardList, Settings, LogOut } from 'lucide-react'
 
 const navItems = [
     {
-        label: 'Today',
-        href: '/today',
-        icon: (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="8" r="6.5" />
-                <path d="M8 4.5V8L10 10" />
-            </svg>
-        ),
-    },
-    {
         label: 'All tasks',
         href: '/tasks',
-        icon: (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 4h10M3 8h10M3 12h7" />
-            </svg>
-        ),
+        icon: <ListTodo size={16} />,
     },
     {
         label: 'Sprint',
         href: '/sprint',
-        icon: (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 3h12v10H2zM5.5 3V1.5M10.5 3V1.5M2 6.5h12" />
-            </svg>
-        ),
+        icon: <CalendarDays size={16} />,
     },
     {
         label: 'Journal',
         href: '/journal',
-        icon: (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 2h10v12H3zM5.5 5h5M5.5 8h5M5.5 11h3" />
-            </svg>
-        ),
+        icon: <BookOpen size={16} />,
     },
-    {
-        label: 'Activity',
-        href: '/activity',
-        icon: (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 8h3l2-5 2 10 2-5h3" />
-            </svg>
-        ),
-    },
-]
-
-const buckets = [
-    { label: 'Work', color: '#3B82F6', key: 'workCount' as const },
-    { label: 'Learn', color: '#F59E0B', key: 'learnCount' as const },
-    { label: 'Personal', color: '#D946EF', key: 'lifeCount' as const },
 ]
 
 interface SidebarProps {
@@ -67,7 +35,31 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname()
+    const router = useRouter()
     const store = useStore()
+
+    const [now, setNow] = useState(() => new Date())
+    const [profileName, setProfileName] = useState('')
+
+    useEffect(() => {
+        fetchProfile().then((p) => { if (p?.name) setProfileName(p.name) }).catch(() => { })
+    }, [])
+
+    useEffect(() => {
+        const tick = () => setNow(new Date())
+        const msUntilNextMinute = (60 - new Date().getSeconds()) * 1000
+        const timeout = setTimeout(() => {
+            tick()
+            const interval = setInterval(tick, 60_000)
+            return () => clearInterval(interval)
+        }, msUntilNextMinute)
+        return () => clearTimeout(timeout)
+    }, [])
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(' ', '')
+    const dateStr = `${dayNames[now.getDay()]} ${monthNames[now.getMonth()]} ${now.getDate()}`
 
     return (
         <>
@@ -88,18 +80,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         `}
             >
                 {/* Logo */}
-                <div className="flex items-center gap-2.5 px-4 py-4">
-                    <div className="w-7 h-7 rounded-lg bg-text flex items-center justify-center">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path
-                                d="M7 1L8.5 5L13 5.5L9.5 8.5L10.5 13L7 10.5L3.5 13L4.5 8.5L1 5.5L5.5 5L7 1Z"
-                                fill="#0F0F0F"
-                            />
-                        </svg>
+                <div className="flex items-center gap-2.5 px-4 pt-6 pb-4">
+                    <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image src="/avatar.png" alt="Avatar" width={36} height={36} className="w-full h-full object-cover" />
                     </div>
-                    <span className="font-semibold text-[17px] text-text">
-                        Focus
-                    </span>
+                    <div className="flex flex-col">
+                        <span className="font-bold text-[17px] text-white leading-tight">
+                            Hi {profileName || 'there'}!
+                        </span>
+                        <span className="text-[12px] text-text1 mt-0.5">
+                            {timeStr} · {dateStr}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Nav items */}
@@ -121,7 +113,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 </span>
                                 <span className="flex-1">{item.label}</span>
                                 {item.label === 'All tasks' && (
-                                    <span className="bg-surface3 text-text3 text-[11px] px-1.5 py-px rounded-full">
+                                    <span className="bg-surface3 text-text font-semibold text-[11px] px-1.5 py-px rounded-full">
                                         {store.openCount}
                                     </span>
                                 )}
@@ -130,34 +122,55 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     })}
                 </nav>
 
-                {/* Buckets section */}
+                {/* Tools section */}
                 <div className="px-2 mt-4">
                     <div className="text-[10px] font-medium text-text3 uppercase tracking-[0.08em] ml-2 mb-1">
-                        Buckets
+                        Tools
                     </div>
-                    {buckets.map((bucket) => (
-                        <div
-                            key={bucket.label}
-                            className="flex items-center gap-2.5 h-[34px] px-2.5 rounded-[10px] text-[13px] text-text2"
-                        >
-                            <span
-                                className="w-[7px] h-[7px] rounded-full mr-0.5"
-                                style={{ backgroundColor: bucket.color }}
-                            />
-                            <span className="flex-1">{bucket.label}</span>
-                            <span className="bg-surface3 text-text3 text-[11px] px-1.5 py-px rounded-full">
-                                {store[bucket.key]}
-                            </span>
-                        </div>
-                    ))}
+                    {(() => {
+                        const isActive = pathname === '/checklists'
+                        return (
+                            <Link
+                                href="/checklists"
+                                onClick={onClose}
+                                className={`flex items-center gap-2.5 h-[34px] px-2.5 rounded-[10px] text-[13px] transition-all duration-150 ${isActive ? 'bg-surface2 text-text font-medium' : 'text-text2 hover:bg-surface2 hover:text-text'}`}
+                            >
+                                <span className={isActive ? 'opacity-100' : 'opacity-60'}>
+                                    <ClipboardList size={16} />
+                                </span>
+                                <span className="flex-1">Checklists</span>
+                                {store.checklists.length > 0 && (
+                                    <span className="bg-surface3 text-text font-semibold text-[11px] px-1.5 py-px rounded-full">
+                                        {store.checklists.length}
+                                    </span>
+                                )}
+                            </Link>
+                        )
+                    })()}
+                    {(() => {
+                        const isActive = pathname === '/settings'
+                        return (
+                            <Link
+                                href="/settings"
+                                onClick={onClose}
+                                className={`flex items-center gap-2.5 h-[34px] px-2.5 rounded-[10px] text-[13px] transition-all duration-150 ${isActive ? 'bg-surface2 text-text font-medium' : 'text-text2 hover:bg-surface2 hover:text-text'}`}
+                            >
+                                <span className={isActive ? 'opacity-100' : 'opacity-60'}>
+                                    <Settings size={16} />
+                                </span>
+                                <span className="flex-1">Settings</span>
+                            </Link>
+                        )
+                    })()}
                 </div>
 
                 {/* Sprint mini card */}
-                <div className="mt-auto px-3 pb-4">
-                    {store.sprint && store.sprint.isActive ? (
+                <div className="mt-auto px-3 pb-3">
+                    {store.sprint && store.sprint.isActive && (
                         <Link href="/sprint" onClick={onClose}>
                             <div className="bg-surface2 border border-border rounded-xl p-3">
-                                <div className="text-[10px] font-medium text-text3 uppercase tracking-[0.08em] mb-1">
+                                <div className="text-[10px] font-semibold text-green-500 uppercase tracking-[0.08em] mb-1 flex items-center gap-1.5">
+                                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_5px_2px_rgba(34,197,94,0.4)] flex-shrink-0" />
                                     Active Sprint
                                 </div>
                                 <div className="text-xs text-text line-clamp-2 mb-2">
@@ -176,13 +189,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 </div>
                             </div>
                         </Link>
-                    ) : (
-                        <Link href="/sprint" onClick={onClose}>
-                            <div className="bg-surface2 border border-border rounded-xl p-3">
-                                <div className="text-xs text-text3">No sprint — set one →</div>
-                            </div>
-                        </Link>
                     )}
+                </div>
+
+                {/* Sign out */}
+                <div className="px-2 pb-5">
+                    <button
+                        onClick={async () => {
+                            const supabase = createClient()
+                            await supabase.auth.signOut()
+                            router.push('/auth')
+                            router.refresh()
+                        }}
+                        className="flex items-center gap-2.5 h-[34px] w-full px-2.5 rounded-[10px] text-[13px] text-text3 hover:bg-surface2 hover:text-text transition-all duration-150"
+                    >
+                        <LogOut size={16} className="opacity-60" />
+                        <span>Sign out</span>
+                    </button>
                 </div>
             </aside>
         </>

@@ -30,7 +30,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
                 onClick={onClose}
             />
             <div
-                className="relative bg-surface border border-border2 rounded-2xl p-7 w-[90vw] max-w-[480px]"
+                className="relative bg-surface border border-border2 rounded-2xl p-7 w-[90vw] max-w-[480px] max-h-[90vh] overflow-y-auto"
                 style={{ animation: 'slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
             >
                 {children}

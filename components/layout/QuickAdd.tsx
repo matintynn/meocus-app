@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useStore } from '@/lib/store'
 import { useToast } from '@/components/ui/Toast'
 import { Bucket, Urgency } from '@/lib/types'
+import { Plus, ChevronRight } from 'lucide-react'
 
 const BUCKET_KEY = 'focus_last_bucket'
 
@@ -57,6 +58,7 @@ export default function QuickAdd() {
             isDone: false,
             doneAt: null,
             sprintId: tagToSprint && sprint?.isActive ? sprint.id : null,
+            notes: '',
         })
 
         setTitle('')
@@ -100,9 +102,7 @@ export default function QuickAdd() {
             {/* Row 1: input + buttons */}
             <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-surface3 flex items-center justify-center flex-shrink-0">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#F5F5F7" strokeWidth="1.5" strokeLinecap="round">
-                        <path d="M7 3v8M3 7h8" />
-                    </svg>
+                    <Plus size={14} color="#F5F5F7" strokeWidth={1.5} />
                 </div>
 
                 <input
@@ -149,9 +149,9 @@ export default function QuickAdd() {
                     <button
                         onClick={handleSubmit}
                         disabled={!title.trim()}
-                        className="bg-text text-bg text-[13px] font-medium rounded-xl px-3.5 py-1.5 hover:opacity-85 transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap"
+                        className="bg-text text-bg text-[13px] font-medium rounded-xl px-3.5 py-1.5 hover:opacity-85 transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap inline-flex items-center gap-1"
                     >
-                        Add →
+                        Add <ChevronRight size={13} />
                     </button>
                 </div>
             </div>
@@ -190,9 +190,9 @@ export default function QuickAdd() {
                 <button
                     onClick={handleSubmit}
                     disabled={!title.trim()}
-                    className="bg-text text-bg text-[13px] font-medium rounded-xl px-3.5 py-1.5 hover:opacity-85 transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap"
+                    className="bg-text text-bg text-[13px] font-medium rounded-xl px-3.5 py-1.5 hover:opacity-85 transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap inline-flex items-center gap-1"
                 >
-                    Add →
+                    Add <ChevronRight size={13} />
                 </button>
             </div>
         </div>

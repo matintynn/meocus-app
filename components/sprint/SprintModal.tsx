@@ -146,7 +146,7 @@ export default function SprintModal({ isOpen, onClose, onSave, existing }: Sprin
             </label>
 
             <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                <Button variant="secondary" onClick={onClose}>Cancel</Button>
                 <Button onClick={handleSave} disabled={!title.trim()}>
                     {existing ? 'Save changes' : 'Start sprint'}
                 </Button>
