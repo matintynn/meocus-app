@@ -157,7 +157,7 @@ export default function AddTaskModal({ isOpen, onClose, onSave, hasSprint, defau
                         type="date"
                         value={deadline}
                         onChange={(e) => setDeadline(e.target.value)}
-                        className="w-full bg-surface2 border border-border rounded-lg px-3 py-2.5 text-[14px] text-text focus:border-border2 focus:outline-none cursor-pointer"
+                        className="w-full min-w-0 bg-surface2 border border-border rounded-lg px-3 py-2.5 text-[14px] text-text focus:border-border2 focus:outline-none cursor-pointer"
                         style={{ colorScheme: 'dark' }}
                     />
                 </div>
