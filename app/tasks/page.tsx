@@ -243,7 +243,7 @@ function TasksContent() {
         return bucketLanes
     }, [activeTab, bucketLanes, todayTasksByBucket, upcomingTasksByBucket, confettiHoldLanes])
 
-    const gridCols = activeLanes.length === 1 ? 'grid-cols-1' : activeLanes.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
+    const gridCols = activeLanes.length === 1 ? 'grid-cols-1 max-w-[50%]' : activeLanes.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
 
     const handleDragEnd = useCallback((result: DropResult) => {
         const { source, destination, draggableId } = result
